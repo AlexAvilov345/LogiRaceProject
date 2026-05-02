@@ -1,7 +1,9 @@
 import pygame
 from player import Player
+from base import Base
 
 WIDTH, HEIGHT = 1024, 1024
+FPS = 60
 
 def draw_infinite_map(screen, camera_x, camera_y, bg_top, bg_down):
     kartinki_w = bg_top.get_width()
@@ -24,6 +26,30 @@ def main():
     WIDTH, HEIGHT = 1024, 1024
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     player = Player(WIDTH // 4, HEIGHT // 4)
+    base = Base(300, 700)
+    bases = [base]
+    scene = "mars"
+    outside_player_x = player.x
+    outside_player_y = player.y
+    base_bg = pygame.image.load("mars_game/img/T_37CF.png").convert()
+    base_bg = pygame.transform.scale(base_bg, (WIDTH, HEIGHT))
+    base_walls = [
+    pygame.Rect(100, 400, 840, 25),   
+    pygame.Rect(100, 760, 840, 25),  
+    pygame.Rect(100, 295, 25, 490),   
+    pygame.Rect(915, 295, 25, 490),  
+    
+    pygame.Rect(685, 615, 165, 65),  
+    pygame.Rect(685, 695, 165, 65), 
+    pygame.Rect(850, 535, 80, 65),
+    pygame.Rect(400, 370, 80, 115),   
+    pygame.Rect(725, 370, 80, 115),
+    pygame.Rect(280, 733, 165, 35),
+    pygame.Rect(124, 543, 30, 115),
+    pygame.Rect(212, 468, 50, 45),
+    pygame.Rect(136, 467, 50, 50),
+]
+
     bg_top = pygame.image.load("mars_game/img/gemini-2.5-flash-image_pixel_art_mars_background_game_style_2D-0 (1) (6).png").convert()
     bg_down = pygame.image.load("mars_game/img/gemini-2.5-flash-image_pixel_art_mars_background_game_style_2D-0 (1) (5) (1).png").convert()
 
@@ -36,12 +62,51 @@ def main():
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     exit()
+                if event.key == pygame.K_e and scene == "mars":
+                    for base in bases:
+                        if base.can_interact(player):
+                            outside_player_x = player.x
+                            outside_player_y = player.y
+                            scene = "base"
+                            player.x = WIDTH // 2
+                            player.y = HEIGHT // 2
+                            player.vel_x = 0
+                            player.vel_y = 0
+                if event.key == pygame.K_q and scene == "base":
+                    scene = "mars"
+
+                    player.x = outside_player_x
+                    player.y = outside_player_y + 80
+                    player.vel_x = 0
+                    player.vel_y = 0
+
         player.handle_input()
-        player.update(WIDTH, HEIGHT )
-        camera_x = player.x - WIDTH // 2
-        camera_y = player.y - HEIGHT // 2
-        draw_infinite_map(screen, camera_x, camera_y, bg_top, bg_down)
-        player.draw(screen, camera_x, camera_y)
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            print(pygame.mouse.get_pos())
+
+        if scene == "mars":
+
+            player.update(WIDTH, HEIGHT, bases)
+            camera_x = player.x - WIDTH // 2
+            camera_y = player.y - HEIGHT // 2
+            draw_infinite_map(screen, camera_x, camera_y, bg_top, bg_down)
+            for base in bases:
+                base.draw(screen, camera_x, camera_y)
+
+                interact_rect = base.door_rect.inflate(160, 160)
+                #pygame.draw.rect(screen, (0, 225, 0), (interact_rect.x - camera_x, interact_rect.y - camera_y, interact_rect.width, interact_rect.height), 3)
+
+
+
+            player.draw(screen, camera_x, camera_y)
+
+        elif scene == "base":
+            player.update_inside_base(base_walls)
+            screen.blit(base_bg, (0, 0))
+            #for wall in base_walls:
+                #pygame.draw.rect(screen, (255, 0, 0), wall, 3)
+
+            player.draw(screen, 0, 0)
         pygame.display.flip()
 
 

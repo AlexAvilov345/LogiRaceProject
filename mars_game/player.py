@@ -51,12 +51,35 @@ class Player:
         self.vel_x += (target_x - self.vel_x) * 0.2
         self.vel_y += (target_y - self.vel_y) * 0.2
 
-    def update(self, screen_width, screen_height):
+    def update(self, screen_width, screen_height, bases):
+        old_x = self.x
+        old_y = self.y
         self.x += self.vel_x
         self.y += self.vel_y
        
         if self.y < 500:
             self.y = 500
+        player_rect = pygame.Rect(self.x + 40, self.y + 40, 80, 80)
+        for base in bases:
+            if player_rect.colliderect(base.rect):
+                self.x = old_x
+                self.y = old_y
+                break
+    def update_inside_base(self, walls):
+        old_x = self.x
+        old_y = self.y
+
+        self.x += self.vel_x
+        self.y += self.vel_y
+
+        player_rect = pygame.Rect(self.x + 40, self.y + 40, 80, 80)
+
+        for wall in walls:
+            if player_rect.colliderect(wall):
+                self.x = old_x
+                self.y = old_y
+                break
+
         
 
     def draw(self, screen, camera_x, camera_y):
