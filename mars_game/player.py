@@ -4,23 +4,23 @@ class Player:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-
         self.speed = 1
+        self.acceleration = 0.03
         self.vel_x = 0
         self.vel_y = 0
         
 
         self.img_right = pygame.image.load("mars_game/img/rover.1x.thumb (1).png").convert_alpha()
-        self.img_right = pygame.transform.scale(self.img_right, (128, 128))
+        self.img_right = pygame.transform.scale(self.img_right, (160, 160))
         
         self.img_left = pygame.image.load("mars_game/img/rover.1x.thumb (3).png").convert_alpha()
-        self.img_left = pygame.transform.scale(self.img_left, (128, 128))
+        self.img_left = pygame.transform.scale(self.img_left, (160, 160))
 
         self.img_up = pygame.image.load("mars_game/img/gemini-2.5-flash-image_2D_pixel_art_rover_on_Mars_top-down_RPG_style_like_Undertale_the_rover_is_facing-0 (1).png").convert_alpha()
-        self.img_up = pygame.transform.scale(self.img_up, (208, 208))
+        self.img_up = pygame.transform.scale(self.img_up, (220, 220))
         
         self.img_down = pygame.image.load("mars_game/img/gemini-2.5-flash-image_2D_pixel_art_rover_on_Mars_top-down_RPG_style_like_Undertale_the_rover_is_facing-0 (2).png").convert_alpha()
-        self.img_down = pygame.transform.scale(self.img_down, (208, 208))
+        self.img_down = pygame.transform.scale(self.img_down, (220, 220))
 
         self.current_image = self.img_right
     
@@ -48,8 +48,8 @@ class Player:
             self.current_image = self.img_down
 
 
-        self.vel_x += (target_x - self.vel_x) * 0.2
-        self.vel_y += (target_y - self.vel_y) * 0.2
+        self.vel_x += (target_x - self.vel_x) * self.acceleration
+        self.vel_y += (target_y - self.vel_y) * self.acceleration
 
     def update(self, screen_width, screen_height, bases):
         old_x = self.x
@@ -72,13 +72,16 @@ class Player:
         self.x += self.vel_x
         self.y += self.vel_y
 
-        player_rect = pygame.Rect(self.x + 40, self.y + 40, 80, 80)
+        player_rect = self.get_rect()
+
 
         for wall in walls:
             if player_rect.colliderect(wall):
                 self.x = old_x
                 self.y = old_y
                 break
+    def get_rect(self):
+        return pygame.Rect(self.x + 40, self.y + 40, 80, 80)
 
         
 

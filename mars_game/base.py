@@ -8,7 +8,7 @@ class Base:
         self.img = pygame.transform.scale(self.img, (300, 300))
         self.width = self.img.get_width()
         self.height = self.img.get_height()
-        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        self.rect = pygame.Rect(self.x, self.y - 30, self.width, self.height)
         self.door_rect = pygame.Rect(self.x + 120, self.y + 230, 60, 70)
     def can_interact(self, player):
         player_rect = pygame.Rect(player.x + 40, player.y + 40, 80, 80)
