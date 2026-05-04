@@ -27,6 +27,7 @@ def main():
     pygame.init()
     WIDTH, HEIGHT = 1024, 1024
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    clock = pygame.time.Clock()
     scene = "base"
     human = Human(500, 520)
     rover = Player(430, 520)
@@ -140,9 +141,11 @@ def main():
             active_player.handle_input()
         elif scene == "mars":
             active_player.handle_input()
-        active_player.animate()
+        active_player.handle_input()
+
         if active_player == human:
             human.animate()
+
 
 
 
@@ -196,6 +199,7 @@ def main():
             if not in_rover:
                 human.draw(screen, 0, 0)
         pygame.display.flip()
+        clock.tick(FPS)
 
 
 if __name__ == "__main__":

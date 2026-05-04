@@ -4,8 +4,8 @@ class Player:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.speed = 1
-        self.acceleration = 0.03
+        self.speed = 8
+        self.acceleration = 0.05
         self.vel_x = 0
         self.vel_y = 0
         

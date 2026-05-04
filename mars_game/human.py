@@ -7,11 +7,11 @@ class Human:
         self.y = y
         self.vel_x = 0
         self.vel_y = 0
-        self.speed = 0.5
+        self.speed = 3.5
         self.size = 96
 
         self.frame_index = 0
-        self.animation_speed = 0.08
+        self.animation_speed = 0.12
         self.is_moving = False
         self.direction = "down"
 
