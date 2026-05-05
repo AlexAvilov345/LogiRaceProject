@@ -3,11 +3,13 @@ import pygame
 
 class Human:
     def __init__(self, x, y):
-        self.x = x
-        self.y = y
+        self.x = 500
+        self.y = 400
         self.vel_x = 0
         self.vel_y = 0
-        self.speed = 3.5
+        self.base_speed = 4.5
+        self.mars_speed = 5
+        self.speed = self.base_speed
         self.size = 96
 
         self.frame_index = 0
@@ -121,43 +123,70 @@ class Human:
         self.current_mars_image = mars_frames[self.direction]
 
     def get_rect(self):
-        return pygame.Rect(self.x + 24, self.y + 24, 48, 48)
+        return pygame.Rect(self.x + 24, self.y + 24, 48, 60)
 
-    def update_inside_base(self, walls):
-        old_x = self.x
-        old_y = self.y
-
+    def update_inside_base(self, walls, rover=None):
         self.x += self.vel_x
-        self.y += self.vel_y
-
-        player_rect = self.get_rect()
 
         for wall in walls:
-            if player_rect.colliderect(wall):
-                self.x = old_x
-                self.y = old_y
+            if self.get_rect().colliderect(wall):
+                self.x -= self.vel_x
                 break
 
-    def update_mars(self, bases):
-        old_x = self.x
-        old_y = self.y
+        if rover is not None and self.get_rect().colliderect(rover.get_rect()):
+            self.x -= self.vel_x
 
+        self.y += self.vel_y
+
+        for wall in walls:
+            if self.get_rect().colliderect(wall):
+                self.y -= self.vel_y
+                break
+
+        if rover is not None and self.get_rect().colliderect(rover.get_rect()):
+            self.y -= self.vel_y
+
+    def update_mars(self, bases, rover, homes=None):
         self.x += self.vel_x
+
+        for base in bases:
+            if self.get_rect().colliderect(base.rect):
+                self.x -= self.vel_x
+                break
+
+        if homes:
+            for h in homes:
+                if self.get_rect().colliderect(h.rect):
+                    self.x -= self.vel_x
+                    break
+
+        if self.get_rect().colliderect(rover.get_rect()):
+            self.x -= self.vel_x
+
         self.y += self.vel_y
 
         if self.y < 500:
             self.y = 500
 
-        player_rect = self.get_rect()
-
         for base in bases:
-            if player_rect.colliderect(base.rect):
-                self.x = old_x
-                self.y = old_y
+            if self.get_rect().colliderect(base.rect):
+                self.y -= self.vel_y
                 break
+
+        if homes:
+            for h in homes:
+                if self.get_rect().colliderect(h.rect):
+                    self.y -= self.vel_y
+                    break
+
+        if self.get_rect().colliderect(rover.get_rect()):
+            self.y -= self.vel_y
+
 
     def draw(self, screen, camera_x, camera_y):
         screen.blit(self.current_image, (self.x - camera_x, self.y - camera_y))
 
     def draw_mars(self, screen, camera_x, camera_y):
-        screen.blit(self.current_mars_image, (self.x - camera_x, self.y - camera_y))
+            screen.blit(self.current_mars_image, (self.x - camera_x, self.y - camera_y))
+
+

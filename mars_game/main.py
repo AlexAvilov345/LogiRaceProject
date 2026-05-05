@@ -2,6 +2,7 @@ import pygame
 from player import Player
 from base import Base
 from human import Human
+from home import Home
 
 
 WIDTH, HEIGHT = 1024, 1024
@@ -43,26 +44,42 @@ def main():
 
     base = Base(300, 700)
     bases = [base]
+    home = Home(800, 600)   
+    homes = [home]
+    home_bg = pygame.image.load("mars_game/img/home_inside.png").convert()
+    home_bg = pygame.transform.scale(home_bg, (WIDTH, HEIGHT))
+
+    home_walls = [
+    pygame.Rect(100, 100, 800, 20),  
+    pygame.Rect(100, 900, 800, 20),
+    pygame.Rect(100, 100, 20, 800),
+    pygame.Rect(900, 100, 20, 800),
+]
     outside_player_x = base.x
     outside_player_y = base.y
-    base_bg = pygame.image.load("mars_game/img/T_37CF.png").convert()
+    base_bg = pygame.image.load("mars_game/img/base.png").convert()
     base_bg = pygame.transform.scale(base_bg, (WIDTH, HEIGHT))
     base_walls = [
-    pygame.Rect(100, 400, 840, 25),   
-    pygame.Rect(100, 760, 840, 25),  
-    pygame.Rect(100, 295, 25, 490),   
-    pygame.Rect(915, 295, 25, 490),  
-    
-    pygame.Rect(685, 615, 165, 65),  
-    pygame.Rect(685, 695, 165, 65), 
-    pygame.Rect(850, 535, 80, 65),
-    pygame.Rect(400, 370, 80, 115),   
-    pygame.Rect(725, 370, 80, 115),
-    pygame.Rect(280, 733, 165, 35),
-    pygame.Rect(124, 543, 30, 115),
-    pygame.Rect(212, 468, 50, 45),
-    pygame.Rect(136, 467, 50, 50),
-    pygame.Rect(851, 439, 50, 90),
+    pygame.Rect(95, 240, 840, 20),  #веохняя 
+    pygame.Rect(95, 920, 840, 20),  #нижняя 
+    pygame.Rect(140, 95, 20, 820),  #левая 
+    pygame.Rect(860, 95, 20, 820),  #правая 
+
+    pygame.Rect(105, 880, 305, 20),   
+    pygame.Rect(610, 880, 295, 20), 
+
+    pygame.Rect(760, 115, 140, 200),
+
+
+    pygame.Rect(115, 320, 155, 220),
+
+    pygame.Rect(750, 330, 155, 220),
+
+    pygame.Rect(150, 590, 90, 70),
+
+    pygame.Rect(720, 590, 155, 130),
+
+    pygame.Rect(140, 735, 200, 120),
 ]
 
     bg_top = pygame.image.load("mars_game/img/gemini-2.5-flash-image_pixel_art_mars_background_game_style_2D-0 (1) (6).png").convert()
@@ -81,9 +98,8 @@ def main():
                     if in_rover:
                         in_rover = False
                         active_player = human
-
-                        human.x = rover.x + 120
-                        human.y = rover.y
+                        human.x = rover.x + 130
+                        human.y = rover.y + 40
                         human.vel_x = 0
                         human.vel_y = 0
                         rover.vel_x = 0
@@ -98,6 +114,7 @@ def main():
                         if human.get_rect().colliderect(rover.get_rect().inflate(80, 80)):
                             in_rover = True
                             scene = "mars"
+                            
                             active_player = rover
 
                             rover.x = base.x + 120
@@ -110,12 +127,18 @@ def main():
                         if human.get_rect().colliderect(rover.get_rect().inflate(120, 120)):
                             in_rover = True
                             active_player = rover
-
-                            human.x = rover.x
+                            human.x = rover.x   
                             human.y = rover.y
                             human.vel_x = 0
                             human.vel_y = 0
-
+                        else:
+                            for h in homes:
+                                if h.can_interact(human):
+                                    scene = "home"
+                                    human.x = 500
+                                    human.y = 500
+                                    human.vel_x = 0
+                                    human.vel_y = 0
                     else:
                         for base in bases:
                             if base.can_interact(rover):
@@ -123,7 +146,7 @@ def main():
                                 in_rover = False
                                 active_player = human
 
-                                human.x = 500
+                                human.x = 600
                                 human.y = 520
                                 human.vel_x = 0
                                 human.vel_y = 0
@@ -131,38 +154,31 @@ def main():
                                 rover.x = 430
                                 rover.y = 520
                                 rover.vel_x = 0
-                                rover.vel_y = 0
-
-
-
-
-        
-        if scene == "base":
-            active_player.handle_input()
+                                rover.vel_y = 0     
+                elif event.key == pygame.K_e and scene == "home":
+                    if home.is_near_door(human):
+                        scene = "mars"
+                        human.x = home.x + 60
+                        human.y = home.y + 130
+                        human.vel_x = 0
+                        human.vel_y = 0
+        if active_player == human:
+            if scene == "base":
+                human.speed = human.base_speed
         elif scene == "mars":
-            active_player.handle_input()
+            human.speed = human.mars_speed
+
         active_player.handle_input()
+
 
         if active_player == human:
             human.animate()
 
-
-
-
-
-
         #if event.type == pygame.MOUSEBUTTONDOWN:
             #print(pygame.mouse.get_pos())
-
-        
-
-
-
-
-
         if scene == "mars":
             if in_rover:
-                rover.update(WIDTH, HEIGHT, bases)
+                rover.update(WIDTH, HEIGHT, bases, homes)
                 target_camera_x = active_player.x - WIDTH // 2
                 target_camera_y = active_player.y - HEIGHT // 2
 
@@ -170,7 +186,7 @@ def main():
                 camera_y += (target_camera_y - camera_y) * 0.08
 
             else:
-                human.update_mars(bases)
+                human.update_mars(bases,rover, homes)
                 target_camera_x = human.x - WIDTH // 2
                 target_camera_y = human.y - HEIGHT // 2
 
@@ -182,6 +198,8 @@ def main():
 
             for base in bases:
                 base.draw(screen, camera_x, camera_y)
+            for h in homes:
+                h.draw(screen, camera_x, camera_y)
 
             rover.draw(screen, camera_x, camera_y)
             if not in_rover:
@@ -189,8 +207,23 @@ def main():
 
 
         elif scene == "base":
-            active_player.update_inside_base(base_walls)
+            if active_player == human:
+                human.update_inside_base(base_walls, rover)
+            else:
+                active_player.update_inside_base(base_walls)
             screen.blit(base_bg, (0, 0))
+            rover.draw(screen, 0, 0)       
+            if not in_rover:
+                human.draw(screen, 0, 0)     
+
+        elif scene == "home":
+            human.update_inside_base(home_walls)
+            screen.blit(home_bg, (0, 0))
+            human.draw(screen, 0, 0)
+            #for wall in base_walls:
+                #pygame.draw.rect(screen, (255, 0, 0), wall, 2)
+            pygame.draw.rect(screen, (0, 255, 0), home.door_rect, 2)
+
     
 
 

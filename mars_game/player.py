@@ -4,23 +4,23 @@ class Player:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.speed = 8
-        self.acceleration = 0.05
+        self.speed = 7.5
+        self.acceleration = 0.04
         self.vel_x = 0
         self.vel_y = 0
         
 
-        self.img_right = pygame.image.load("mars_game/img/rover.1x.thumb (1).png").convert_alpha()
-        self.img_right = pygame.transform.scale(self.img_right, (160, 160))
+        self.img_right = pygame.image.load("mars_game/img/car1.png").convert_alpha()
+        self.img_right = pygame.transform.scale(self.img_right, (192, 128))
         
-        self.img_left = pygame.image.load("mars_game/img/rover.1x.thumb (3).png").convert_alpha()
-        self.img_left = pygame.transform.scale(self.img_left, (160, 160))
+        self.img_left = pygame.image.load("mars_game/img/car2.png").convert_alpha()
+        self.img_left = pygame.transform.scale(self.img_left, (192, 128))
 
-        self.img_up = pygame.image.load("mars_game/img/gemini-2.5-flash-image_2D_pixel_art_rover_on_Mars_top-down_RPG_style_like_Undertale_the_rover_is_facing-0 (1).png").convert_alpha()
-        self.img_up = pygame.transform.scale(self.img_up, (220, 220))
+        self.img_up = pygame.image.load("mars_game/img/car4.png").convert_alpha()
+        self.img_up = pygame.transform.scale(self.img_up, (192, 128))
         
-        self.img_down = pygame.image.load("mars_game/img/gemini-2.5-flash-image_2D_pixel_art_rover_on_Mars_top-down_RPG_style_like_Undertale_the_rover_is_facing-0 (2).png").convert_alpha()
-        self.img_down = pygame.transform.scale(self.img_down, (220, 220))
+        self.img_down = pygame.image.load("mars_game/img/car3.png").convert_alpha()
+        self.img_down = pygame.transform.scale(self.img_down, (192, 128))
 
         self.current_image = self.img_right
     
@@ -50,21 +50,37 @@ class Player:
 
         self.vel_x += (target_x - self.vel_x) * self.acceleration
         self.vel_y += (target_y - self.vel_y) * self.acceleration
+        
 
-    def update(self, screen_width, screen_height, bases):
-        old_x = self.x
-        old_y = self.y
+    def update(self, screen_width, screen_height, bases, homes=None):
         self.x += self.vel_x
-        self.y += self.vel_y
-       
-        if self.y < 500:
-            self.y = 500
-        player_rect = pygame.Rect(self.x + 40, self.y + 40, 80, 80)
+        player_rect = self.get_rect()
+
         for base in bases:
             if player_rect.colliderect(base.rect):
-                self.x = old_x
-                self.y = old_y
+                self.x -= self.vel_x
+                self.vel_x = 0
                 break
+
+        self.y += self.vel_y
+        if self.y < 500:
+            self.y = 500
+            self.vel_y = 0
+
+        player_rect = self.get_rect()
+
+        for base in bases:
+            if player_rect.colliderect(base.rect):
+                self.y -= self.vel_y
+                self.vel_y = 0
+                break
+        if homes:
+            for h in homes:
+                if player_rect.colliderect(h.rover_rect):
+                    self.y -= self.vel_y
+                    self.vel_y = 0
+                    break
+
     def update_inside_base(self, walls):
         old_x = self.x
         old_y = self.y
@@ -81,7 +97,7 @@ class Player:
                 self.y = old_y
                 break
     def get_rect(self):
-        return pygame.Rect(self.x + 40, self.y + 40, 80, 80)
+        return pygame.Rect(self.x + 60, self.y + 5, 80, 80)
 
         
 
@@ -89,3 +105,5 @@ class Player:
         draw_x = self.x - camera_x
         draw_y = self.y - camera_y
         screen.blit(self.current_image, (draw_x, draw_y))
+
+
