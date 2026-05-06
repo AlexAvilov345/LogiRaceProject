@@ -5,7 +5,9 @@ class Home:
         self.x = x
         self.y = y
         self.img = pygame.image.load("mars_game/img/home.png").convert_alpha()
-        self.img = pygame.transform.scale(self.img, (364, 192))
+        self.img = pygame.transform.scale(self.img, (380, 192))
+        self.width = self.img.get_width()
+        self.height = self.img.get_height()
 
         self.rect = pygame.Rect(self.x + 70, self.y, 220, 172)
 
@@ -21,14 +23,4 @@ class Home:
 
     def draw(self, screen, camera_x, camera_y):
         screen.blit(self.img, (self.x - camera_x, self.y - camera_y))
-
-        pygame.draw.rect(screen, (255, 0, 0),
-            pygame.Rect(
-                self.rect.x - camera_x,
-                self.rect.y - camera_y,
-                self.rect.width,
-                self.rect.height
-            ),
-            3
-        )
 

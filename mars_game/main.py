@@ -51,10 +51,28 @@ def main():
     home_bg = pygame.transform.scale(home_bg, (WIDTH, HEIGHT))
 
     home_walls = [
-    pygame.Rect(100, 100, 800, 20),  
-    pygame.Rect(100, 900, 800, 20),
+    pygame.Rect(100, 210, 800, 20),  
+    pygame.Rect(100, 920, 800, 20),
     pygame.Rect(100, 100, 20, 800),
     pygame.Rect(900, 100, 20, 800),
+
+    pygame.Rect(125, 232, 70, 50),  
+    pygame.Rect(122, 872, 40, 50),
+    pygame.Rect(833, 232, 70, 50),
+    pygame.Rect(859, 883, 70, 50),
+
+    pygame.Rect(658, 235, 90, 90),
+    pygame.Rect(792, 377, 60, 160),
+
+    pygame.Rect(143, 424, 160, 110),
+
+    pygame.Rect(120, 560, 110, 110),
+
+    pygame.Rect(134, 690, 160, 110),
+    pygame.Rect(645, 536, 120, 140),
+    pygame.Rect(790, 580, 75, 80),
+
+    pygame.Rect(805, 698, 100, 160),
 ]
     greenhouse = GreenHouse(630, 840)
     greenhouses = [greenhouse]
@@ -63,11 +81,22 @@ def main():
     greenhouse_bg = pygame.transform.scale(greenhouse_bg, (WIDTH, HEIGHT))
 
     greenhouse_walls = [
-        pygame.Rect(100, 100, 800, 20),
-        pygame.Rect(100, 900, 800, 20),
-        pygame.Rect(100, 100, 20, 800),
-        pygame.Rect(900, 100, 20, 800),
-    ]
+    pygame.Rect(75, 333, 870, 25),   
+    pygame.Rect(150, 813, 430, 25),  
+    pygame.Rect(65, 95, 25, 670),     
+    pygame.Rect(950, 95, 25, 670),  
+    pygame.Rect(80, 303, 180, 130), 
+
+
+    pygame.Rect(83, 528, 110, 100),
+    pygame.Rect(64, 737, 100, 25), 
+    pygame.Rect(253, 737, 200, 25), 
+    pygame.Rect(470, 260, 490, 100), 
+
+
+    pygame.Rect(426, 390, 490, 30),
+    pygame.Rect(431, 652, 490, 110)
+]
 
     outside_player_x = base.x
     outside_player_y = base.y
@@ -75,7 +104,7 @@ def main():
     base_bg = pygame.transform.scale(base_bg, (WIDTH, HEIGHT))
     base_walls = [
     pygame.Rect(95, 240, 840, 20),  #веохняя 
-    pygame.Rect(95, 920, 840, 20),  #нижняя 
+    pygame.Rect(95, 920, 840, 20),  #нижня
     pygame.Rect(140, 95, 20, 820),  #левая 
     pygame.Rect(860, 95, 20, 820),  #правая 
 
@@ -200,8 +229,8 @@ def main():
         if active_player == human:
             human.animate()
 
-        #if event.type == pygame.MOUSEBUTTONDOWN:
-            #print(pygame.mouse.get_pos())
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            print(pygame.mouse.get_pos())
         
         if scene == "mars":
             buildings = homes + greenhouses
@@ -251,24 +280,18 @@ def main():
             human.update_inside_base(home_walls)
             screen.blit(home_bg, (0, 0))
             human.draw(screen, 0, 0)
-   
-            for wall in home_walls:
-                pygame.draw.rect(screen, (255, 0, 0), wall, 2)
-            
-            # дебаг двери — зелёный
-            pygame.draw.rect(screen, (0, 255, 0), home.door_rect, 2)
+
             #for wall in base_walls:
                 #pygame.draw.rect(screen, (255, 0, 0), wall, 2)
-            pygame.draw.rect(screen, (0, 255, 0), home.door_rect, 2)
         elif scene == "greenhouse":
             human.update_inside_base(greenhouse_walls)
             screen.blit(greenhouse_bg, (0, 0))
             human.draw(screen, 0, 0)
 
-            for wall in greenhouse_walls:
-                pygame.draw.rect(screen, (255, 0, 0), wall, 2)
+            #for wall in greenhouse_walls:
+                #pygame.draw.rect(screen, (255, 0, 0), wall, 2)
 
-            pygame.draw.rect(screen, (0, 255, 0), greenhouse.inside_door_rect, 2)
+
             rover.draw(screen, 0, 0)
 
             if not in_rover:
