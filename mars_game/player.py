@@ -62,7 +62,15 @@ class Player:
                 self.vel_x = 0
                 break
 
+        if homes:
+            for h in homes:
+                if self.get_rect().colliderect(h.rect):
+                    self.x -= self.vel_x
+                    self.vel_x = 0
+                    break
+
         self.y += self.vel_y
+
         if self.y < 500:
             self.y = 500
             self.vel_y = 0
@@ -74,12 +82,14 @@ class Player:
                 self.y -= self.vel_y
                 self.vel_y = 0
                 break
+
         if homes:
             for h in homes:
-                if player_rect.colliderect(h.rover_rect):
+                if self.get_rect().colliderect(h.rect):
                     self.y -= self.vel_y
                     self.vel_y = 0
                     break
+
 
     def update_inside_base(self, walls):
         old_x = self.x

@@ -3,6 +3,7 @@ from player import Player
 from base import Base
 from human import Human
 from home import Home
+from greenhouse import GreenHouse
 
 
 WIDTH, HEIGHT = 1024, 1024
@@ -44,7 +45,7 @@ def main():
 
     base = Base(300, 700)
     bases = [base]
-    home = Home(800, 600)   
+    home = Home(50, 990)   
     homes = [home]
     home_bg = pygame.image.load("mars_game/img/home_inside.png").convert()
     home_bg = pygame.transform.scale(home_bg, (WIDTH, HEIGHT))
@@ -55,6 +56,19 @@ def main():
     pygame.Rect(100, 100, 20, 800),
     pygame.Rect(900, 100, 20, 800),
 ]
+    greenhouse = GreenHouse(630, 840)
+    greenhouses = [greenhouse]
+
+    greenhouse_bg = pygame.image.load("mars_game/img/greenhouse_bg.png").convert()
+    greenhouse_bg = pygame.transform.scale(greenhouse_bg, (WIDTH, HEIGHT))
+
+    greenhouse_walls = [
+        pygame.Rect(100, 100, 800, 20),
+        pygame.Rect(100, 900, 800, 20),
+        pygame.Rect(100, 100, 20, 800),
+        pygame.Rect(900, 100, 20, 800),
+    ]
+
     outside_player_x = base.x
     outside_player_y = base.y
     base_bg = pygame.image.load("mars_game/img/base.png").convert()
@@ -105,10 +119,6 @@ def main():
                         rover.vel_x = 0
                         rover.vel_y = 0
 
-                if event.key == pygame.K_ESCAPE:
-                    pygame.quit()
-                    exit()
-
                 if event.key == pygame.K_e and scene == "base":
                     if not in_rover:
                         if human.get_rect().colliderect(rover.get_rect().inflate(80, 80)):
@@ -139,6 +149,14 @@ def main():
                                     human.y = 500
                                     human.vel_x = 0
                                     human.vel_y = 0
+                                for g in greenhouses:
+                                    if g.can_interact(human):
+                                        scene = "greenhouse"
+                                        human.x = 500
+                                        human.y = 500
+                                        human.vel_x = 0
+                                        human.vel_y = 0
+
                     else:
                         for base in bases:
                             if base.can_interact(rover):
@@ -158,10 +176,18 @@ def main():
                 elif event.key == pygame.K_e and scene == "home":
                     if home.is_near_door(human):
                         scene = "mars"
-                        human.x = home.x + 60
-                        human.y = home.y + 130
+                        human.x = home.x + 140
+                        human.y = home.y + 200
                         human.vel_x = 0
                         human.vel_y = 0
+                elif event.key == pygame.K_e and scene == "greenhouse":
+                    if greenhouse.is_near_door(human):
+                        scene = "mars"
+                        human.x = greenhouse.x + 140
+                        human.y = greenhouse.y + 300
+                        human.vel_x = 0
+                        human.vel_y = 0
+
         if active_player == human:
             if scene == "base":
                 human.speed = human.base_speed
@@ -176,9 +202,11 @@ def main():
 
         #if event.type == pygame.MOUSEBUTTONDOWN:
             #print(pygame.mouse.get_pos())
+        
         if scene == "mars":
-            if in_rover:
-                rover.update(WIDTH, HEIGHT, bases, homes)
+            buildings = homes + greenhouses
+            if in_rover:              
+                rover.update(WIDTH, HEIGHT, bases, buildings)
                 target_camera_x = active_player.x - WIDTH // 2
                 target_camera_y = active_player.y - HEIGHT // 2
 
@@ -186,7 +214,7 @@ def main():
                 camera_y += (target_camera_y - camera_y) * 0.08
 
             else:
-                human.update_mars(bases,rover, homes)
+                human.update_mars(bases,rover, buildings)
                 target_camera_x = human.x - WIDTH // 2
                 target_camera_y = human.y - HEIGHT // 2
 
@@ -200,6 +228,9 @@ def main():
                 base.draw(screen, camera_x, camera_y)
             for h in homes:
                 h.draw(screen, camera_x, camera_y)
+            for g in greenhouses:
+                g.draw(screen, camera_x, camera_y)
+
 
             rover.draw(screen, camera_x, camera_y)
             if not in_rover:
@@ -220,13 +251,24 @@ def main():
             human.update_inside_base(home_walls)
             screen.blit(home_bg, (0, 0))
             human.draw(screen, 0, 0)
+   
+            for wall in home_walls:
+                pygame.draw.rect(screen, (255, 0, 0), wall, 2)
+            
+            # дебаг двери — зелёный
+            pygame.draw.rect(screen, (0, 255, 0), home.door_rect, 2)
             #for wall in base_walls:
                 #pygame.draw.rect(screen, (255, 0, 0), wall, 2)
             pygame.draw.rect(screen, (0, 255, 0), home.door_rect, 2)
+        elif scene == "greenhouse":
+            human.update_inside_base(greenhouse_walls)
+            screen.blit(greenhouse_bg, (0, 0))
+            human.draw(screen, 0, 0)
 
-    
+            for wall in greenhouse_walls:
+                pygame.draw.rect(screen, (255, 0, 0), wall, 2)
 
-
+            pygame.draw.rect(screen, (0, 255, 0), greenhouse.inside_door_rect, 2)
             rover.draw(screen, 0, 0)
 
             if not in_rover:

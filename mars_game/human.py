@@ -189,4 +189,3 @@ class Human:
     def draw_mars(self, screen, camera_x, camera_y):
             screen.blit(self.current_mars_image, (self.x - camera_x, self.y - camera_y))
 
-
