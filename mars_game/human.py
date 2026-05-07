@@ -3,8 +3,8 @@ import pygame
 
 class Human:
     def __init__(self, x, y):
-        self.x = 500
-        self.y = 400
+        self.x = x
+        self.y = y
         self.vel_x = 0
         self.vel_y = 0
         self.base_speed = 4.5
@@ -160,8 +160,9 @@ class Human:
                     self.x -= self.vel_x
                     break
 
-        if self.get_rect().colliderect(rover.get_rect()):
-            self.x -= self.vel_x
+        if rover is not None and self.get_rect().colliderect(rover.get_rect()):
+            self.x -= self.vel_x    
+
 
         self.y += self.vel_y
 
@@ -179,8 +180,9 @@ class Human:
                     self.y -= self.vel_y
                     break
 
-        if self.get_rect().colliderect(rover.get_rect()):
-            self.y -= self.vel_y
+        if rover is not None and self.get_rect().colliderect(rover.get_rect()):
+                self.y -= self.vel_y
+
 
 
     def draw(self, screen, camera_x, camera_y):

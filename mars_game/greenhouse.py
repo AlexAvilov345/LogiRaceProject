@@ -9,7 +9,7 @@ class GreenHouse:
         self.width = self.img.get_width()
         self.height = self.img.get_height()
 
-        self.rect = pygame.Rect(self.x, self.y - 10, self.width, self.height)
+        self.rect = pygame.Rect(self.x + 24, self.y - 10, 420, 280)
         self.door_rect = pygame.Rect(self.x + 60, self.y + 230, 80, 60)
         self.inside_door_rect = pygame.Rect(148, 763, 120, 80)
 
