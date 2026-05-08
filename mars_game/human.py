@@ -11,6 +11,9 @@ class Human:
         self.mars_speed = 5
         self.speed = self.base_speed
         self.size = 96
+        self.max_hp = 5
+        self.hp = 5
+        self.damage_face_timer = 0
 
         self.frame_index = 0
         self.animation_speed = 0.12

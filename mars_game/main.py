@@ -218,7 +218,7 @@ def draw_computer_menu(screen, computer_menu, computer_selected, inventory=None,
         all_items = inventory + storage_inventory
 
         process_title = font.render("PROCESS RESOURCES", True, UI_TEXT)
-        screen.blit(process_title, (panel_x + 120, panel_y + 90))
+        screen.blit(process_title, (panel_x + 50, panel_y + 90))
 
         slot_size = 64
         item_size = 44
@@ -230,7 +230,7 @@ def draw_computer_menu(screen, computer_menu, computer_selected, inventory=None,
 
         if len(all_items) == 0:
             text = font.render("NO RESOURCES", True, UI_TEXT_DIM)
-            screen.blit(text, (panel_x + 170, panel_y + 210))
+            screen.blit(text, (panel_x + 200, panel_y + 210))
             return
 
         for i, item in enumerate(all_items[:15]):
@@ -350,6 +350,68 @@ def draw_home_computer(screen, home_info_selected, rover_inside_base, inventory,
     for i, line in enumerate(lines):
         text = small_font.render(line, True, UI_TEXT)
         screen.blit(text, (panel_x + 90, info_y + i * 45))
+def draw_greenhouse_menu(
+    screen,
+    greenhouse_selected,
+    crop_recipes,
+    growing_crop,
+    growing_timer,
+    growing_ready
+):
+    panel_width = 620
+    panel_height = 420
+
+    panel_x = (WIDTH - panel_width) // 2
+    panel_y = (HEIGHT - panel_height) // 2
+
+    pygame.draw.rect(screen, UI_SHADOW, (panel_x + 10, panel_y + 10, panel_width, panel_height))
+    pygame.draw.rect(screen, UI_BG, (panel_x, panel_y, panel_width, panel_height))
+    pygame.draw.rect(screen, UI_BORDER, (panel_x, panel_y, panel_width, panel_height), 5)
+
+    font = pygame.font.Font("mars_game/fonts/PressStart2P-Regular.ttf", 16)
+
+    title = font.render("GREENHOUSE COMPUTER", True, UI_TEXT)
+    screen.blit(title, (panel_x + 150, panel_y + 35))
+
+    recipe_keys = list(crop_recipes.keys())
+
+    for i, key in enumerate(recipe_keys):
+        recipe = crop_recipes[key]
+
+        y = panel_y + 120 + i * 60
+
+        color = UI_TEXT_DIM
+
+        if i == greenhouse_selected:
+            color = UI_SELECTED
+
+            pygame.draw.rect(
+                screen,
+                UI_SELECTED,
+                (panel_x + 40, y - 10, 520, 38),
+                3
+            )
+
+        text = font.render(
+            f"{recipe['title']} - {recipe['cost']} DETAILS",
+            True,
+            color
+        )
+
+        screen.blit(text, (panel_x + 70, y))
+
+    if growing_crop is not None:
+        recipe = crop_recipes[growing_crop]
+
+        if growing_ready:
+            status = f"{recipe['title']} READY!"
+        else:
+            seconds = max(0, growing_timer // FPS)
+            status = f"GROWING: {seconds} SEC"
+
+        status_text = font.render(status, True, UI_TEXT)
+
+        screen.blit(status_text, (panel_x + 190, panel_y + 340))
 def count_item(items, name):
     count = 0
     for item in items:
@@ -357,14 +419,30 @@ def count_item(items, name):
             count += 1
     return count
 
+def remove_details(inventory, storage_inventory, amount):
+    removed = 0
+    for items in [inventory, storage_inventory]:
+        i = 0
 
+        while i < len(items):
+            if items[i]["name"] == "detail":
+                items.pop(i)
+                removed += 1
+                if removed >= amount:
+                    return True
+            else:
+                i += 1
+
+    return False
 
 def main():
     pygame.init()
 
-    WIDTH, HEIGHT = 1024, 1024
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
+    scene = "menu"
+    menu_bg = pygame.image.load("mars_game/img/menu_bg.png").convert()
+    menu_bg = pygame.transform.scale(menu_bg, (WIDTH, HEIGHT))
     scene = "base"
     human = Human(500, 400)
     rover = Player(430, 520)
@@ -474,6 +552,8 @@ def main():
     bg_down = pygame.image.load("mars_game/img/gemini-2.5-flash-image_pixel_art_mars_background_game_style_2D-0 (1) (5) (1).png").convert()
 
 
+
+
     
 
     inventory = []
@@ -497,6 +577,14 @@ def main():
     home_computer_rect = pygame.Rect(326, 179, 90, 90)
     show_home_computer = False
     home_info_selected = 0
+
+    greenhouse_computer_rect = pygame.Rect(296, 315, 60, 80)
+    show_greenhouse_menu = False
+    greenhouse_selected = 0
+    growing_crop = None
+    growing_timer = 0
+    growing_ready = False
+
 
 
 
@@ -559,6 +647,50 @@ def main():
                 exit()
             
             if event.type == pygame.KEYDOWN:
+                if show_greenhouse_menu:
+
+                    recipe_keys = list(crop_recipes.keys())
+
+                    if event.key == pygame.K_ESCAPE:
+                        show_greenhouse_menu = False
+
+                    elif event.key == pygame.K_UP:
+                        greenhouse_selected -= 1
+
+                        if greenhouse_selected < 0:
+                            greenhouse_selected = len(recipe_keys) - 1
+
+                    elif event.key == pygame.K_DOWN:
+                        greenhouse_selected += 1
+
+                        if greenhouse_selected >= len(recipe_keys):
+                            greenhouse_selected = 0
+
+                    elif event.key == pygame.K_RETURN:
+
+                        if growing_crop is None or growing_ready:
+                            growing_ready = False
+                            selected_key = recipe_keys[greenhouse_selected]
+                            recipe = crop_recipes[selected_key]
+
+                            total_details = (
+                                count_item(inventory, "detail")
+                                + count_item(storage_inventory, "detail")
+                            )
+
+                            if total_details >= recipe["cost"]:
+
+                                remove_details(
+                                    inventory,
+                                    storage_inventory,
+                                    recipe["cost"]
+                                )
+
+                                growing_crop = selected_key
+                                growing_timer = recipe["time"]
+                                growing_ready = False
+
+                    continue
                 if show_home_computer:
                     if event.key == pygame.K_ESCAPE:
                         show_home_computer = False
@@ -636,23 +768,33 @@ def main():
                                 computer_selected = 0
                         elif computer_menu == "process":
                             all_count = len(inventory) + len(storage_inventory)
-                            
 
                             if all_count > 0:
-                                if computer_selected < len(inventory):
+
+                                from_inventory = computer_selected < len(inventory)
+
+                                if from_inventory:
                                     item = inventory.pop(computer_selected)
                                 else:
                                     storage_index = computer_selected - len(inventory)
                                     item = storage_inventory.pop(storage_index)
 
-                                if item["name"] == "big_mars_stone":
-                                    inventory.append(detail_item.copy())
-                                    inventory.append(detail_item.copy())
-                                    inventory.append(detail_item.copy())
-                                else:
-                                    inventory.append(detail_item.copy())
+                                allowed_resources = {
+                                    "mars_stone": 1,
+                                    "big_mars_stone": 3,
+                                }
 
-   
+                                if item["name"] in allowed_resources:
+                                    details_count = allowed_resources[item["name"]]
+
+                                    for _ in range(details_count):
+                                        inventory.append(detail_item.copy())
+
+                                else:
+                                    if from_inventory:
+                                        inventory.insert(computer_selected, item)
+                                    else:
+                                        storage_inventory.insert(storage_index, item)
 
                             computer_selected = 0
 
@@ -835,10 +977,17 @@ def main():
                         human.vel_y = 0
 
                 elif event.key == pygame.K_e and scene == "greenhouse":
-                    if greenhouse.is_near_door(human):
+
+                    if human.get_rect().colliderect(greenhouse_computer_rect.inflate(60, 60)):
+                        show_greenhouse_menu = True
+                        greenhouse_selected = 0
+
+                    elif greenhouse.is_near_door(human):
                         scene = "mars"
+
                         human.x = greenhouse.x + 140
                         human.y = greenhouse.y + 300
+
                         human.vel_x = 0
                         human.vel_y = 0
 
@@ -1006,12 +1155,27 @@ def main():
             draw_computer_menu(screen, computer_menu, computer_selected, inventory, storage_inventory)
         if show_home_computer:
             draw_home_computer(screen, home_info_selected, rover_inside_base, inventory, storage_inventory, resources)
+        if show_greenhouse_menu:
+            draw_greenhouse_menu(
+                screen,
+                greenhouse_selected,
+                crop_recipes,
+                growing_crop,
+                growing_timer,
+                growing_ready
+            )
+                    
+        if growing_crop is not None and not growing_ready:
+            growing_timer -= 1
 
+            if growing_timer <= 0:
+                growing_ready = True
+                
+                recipe = crop_recipes[growing_crop]
 
+                inventory.append(recipe["item"].copy())
 
-
-
-
+              
         pygame.display.flip()
         clock.tick(FPS)
 
