@@ -15,6 +15,7 @@ class Home:
         self.door_rect = pygame.Rect(self.x + 145, self.y + 130, 80, 60)
 
         self.inside_door_rect = pygame.Rect(470, 220, 100, 60)
+        
 
     def can_interact(self, player):
         interact_zone = self.door_rect.inflate(70, 70)

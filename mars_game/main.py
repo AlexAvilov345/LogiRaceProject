@@ -6,6 +6,7 @@ from human import Human
 from home import Home
 from greenhouse import GreenHouse
 from resource import Resource
+from menu import Menu, fade_start, fade_update, fade_busy, fade_draw
 
 
 
@@ -441,13 +442,12 @@ def main():
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
     scene = "menu"
-    menu_bg = pygame.image.load("mars_game/img/menu_bg.png").convert()
-    menu_bg = pygame.transform.scale(menu_bg, (WIDTH, HEIGHT))
-    scene = "base"
+    menu = Menu()
     human = Human(500, 400)
     rover = Player(430, 520)
     camera_x = 0
     camera_y = 0
+
 
 
     active_player = human
@@ -474,7 +474,7 @@ def main():
 
     home_walls = [
         pygame.Rect(100, 210, 800, 20),  
-        pygame.Rect(100, 920, 800, 20),
+        pygame.Rect(100, 940, 800, 20),
         pygame.Rect(100, 100, 20, 800),
         pygame.Rect(900, 100, 20, 800),
 
@@ -503,20 +503,20 @@ def main():
     greenhouse_bg = pygame.transform.scale(greenhouse_bg, (WIDTH, HEIGHT))
 
     greenhouse_walls = [
-        pygame.Rect(75, 333, 870, 25),   
+        pygame.Rect(75, 350, 870, 25),   
         pygame.Rect(150, 813, 430, 25),  
         pygame.Rect(65, 95, 25, 670),     
         pygame.Rect(950, 95, 25, 670),  
+
         pygame.Rect(80, 303, 180, 130), 
 
-
-        pygame.Rect(83, 528, 110, 100),
-        pygame.Rect(64, 737, 100, 25), 
+        pygame.Rect(83, 528, 90, 100),
+        pygame.Rect(64, 737, 80, 25), 
         pygame.Rect(253, 737, 200, 25), 
         pygame.Rect(470, 260, 490, 100), 
 
 
-        pygame.Rect(426, 390, 490, 30),
+        pygame.Rect(426, 410, 490, 30),
         pygame.Rect(431, 652, 490, 110)
     ]
 
@@ -585,6 +585,9 @@ def main():
     growing_timer = 0
     growing_ready = False
 
+    show_fps = False
+    sound_volume = 50
+
 
 
 
@@ -640,11 +643,26 @@ def main():
 
     while True:
         for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                print(pygame.mouse.get_pos())
             if event.type == pygame.QUIT:   
                 pygame.quit()
                 exit()
+            if scene in ("menu", "settings", "about"):
+
+                if scene == "menu":
+                    result = menu.handle_event(event)
+                    if result == "PLAY":
+                        fade_start("__play__")
+                    elif result == "SETTINGS":
+                        fade_start("settings")
+                    elif result == "ABOUT":
+                        fade_start("about")
+                    elif result == "EXIT":
+                        fade_start("__exit__")
+                elif scene == "settings":
+                   show_fps, sound_volume = menu.handle_settings_event(event, show_fps, sound_volume)
+                elif scene == "about":
+                    menu.handle_about_event(event)
+                continue
             
             if event.type == pygame.KEYDOWN:
                 if show_greenhouse_menu:
@@ -850,7 +868,7 @@ def main():
                     if in_rover:
                         in_rover = False
                         active_player = human
-                        human.x = rover.x + 130
+                        human.x = rover.x + 160
                         human.y = rover.y + 40
                         human.vel_x = 0
                         human.vel_y = 0
@@ -1174,6 +1192,38 @@ def main():
                 recipe = crop_recipes[growing_crop]
 
                 inventory.append(recipe["item"].copy())
+        new_scene = fade_update()
+        if new_scene == "__play__":
+            scene = "base"
+            human.x = 600
+            human.y = 520
+            human.vel_x = 0
+            human.vel_y = 0
+            active_player = human
+            in_rover = False
+            rover_inside_base = True
+        elif new_scene == "__exit__":
+            pygame.quit()
+            exit()
+        elif new_scene is not None:
+            scene = new_scene
+
+        if scene in ("menu", "settings", "about"):
+            if scene == "menu":
+                menu.update()
+                menu.draw(screen)
+            elif scene == "settings":
+                menu.update()
+                menu.draw_settings(screen, show_fps, sound_volume)
+            elif scene == "about":
+                menu.update()
+                menu.draw_about(screen)
+            fade_draw(screen)
+            pygame.display.flip()
+            clock.tick(FPS)
+            continue
+
+        fade_draw(screen)
 
               
         pygame.display.flip()
