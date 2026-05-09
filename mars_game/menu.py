@@ -1,4 +1,5 @@
 import pygame
+import random
 
 WIDTH, HEIGHT = 1024, 1024
 
@@ -9,12 +10,25 @@ UI_TEXT_DIM = (120, 150, 165)
 UI_SELECTED = (255, 255, 255)
 UI_SHADOW = (0, 0, 0)
 
-
 fade_alpha = 0   
 fade_speed = 8    
 fade_state = "idle" 
 fade_next = None    
+class Dust:
+    def __init__(self):
+        self.x = random.randint(0, WIDTH)
+        self.y = random.randint(0, HEIGHT)
+        self.speed = random.uniform(0.2, 0.8)
+        self.size = random.randint(1, 3)
 
+    def update(self):
+        self.x -= self.speed
+        if self.x < 0:
+            self.x = WIDTH
+            self.y = random.randint(0, HEIGHT)
+
+    def draw(self, screen):
+        pygame.draw.circle(screen, (200, 160, 120), (int(self.x), int(self.y)), self.size)
 def fade_start(next_scene):
     global fade_alpha, fade_state, fade_next
     if fade_state == "idle":
@@ -103,7 +117,19 @@ class Menu:
     def __init__(self):
         self.bg = pygame.image.load("mars_game/img/menu1.jpg").convert()
         self.bg = pygame.transform.scale(self.bg, (WIDTH, HEIGHT))
+        try:
+            pygame.mixer.music.load("mars_game/sounds/respitemix.ogg")
+            pygame.mixer.music.set_volume(0.5)
+            pygame.mixer.music.play(-1)  
+        except:
+            pass
+        overlay = pygame.Surface((WIDTH, HEIGHT))
+        overlay.set_alpha(40)
+        overlay.fill((255, 80, 40)) 
+        self.bg.blit(overlay, (0, 0))
         self.bg_x = 0
+        self.dust = [Dust() for _ in range(80)]
+        
 
         self.font       = pygame.font.Font("mars_game/fonts/PressStart2P-Regular.ttf", 22)
         self.font_small = pygame.font.Font("mars_game/fonts/PressStart2P-Regular.ttf", 14)
@@ -122,9 +148,7 @@ class Menu:
         self.btn_about_back = Button(362, 820, 300, 60, "BACK")
 
     def update(self):
-        self.bg_x -= 0.3
-        if self.bg_x <= -WIDTH:
-            self.bg_x = 0
+        pass
 
     def _draw_bg(self, screen):
         screen.blit(self.bg, (self.bg_x, 0))
@@ -137,6 +161,9 @@ class Menu:
         for btn in self.buttons:
             btn.draw(screen, self.font_small)
         fade_draw(screen)
+        for d in self.dust:
+            d.update()
+            d.draw(screen)
 
     def draw_settings(self, screen, show_fps, sound_volume):
         self._draw_bg(screen)
@@ -179,11 +206,12 @@ class Menu:
             ("and grow food to stay alive.",      UI_TEXT_DIM, self.font_tiny),
             ("",                                 None,        None),
             ("CONTROLS:",                         UI_BORDER,   self.font_small),
-            ("WASD / Arrows  -  Move",            UI_TEXT_DIM, self.font_tiny),
+            ("WASD  -  Move",            UI_TEXT_DIM, self.font_tiny),
             ("E  -  Interact",                    UI_TEXT_DIM, self.font_tiny),
             ("Q  -  Exit rover",                  UI_TEXT_DIM, self.font_tiny),
             ("TAB  -  Inventory",                 UI_TEXT_DIM, self.font_tiny),
             ("",                                 None,        None),
+            ("MUSIC BY Trevor Lentz",             UI_TEXT_DIM, self.font_tiny),
             ("Version 1.0",                       UI_TEXT_DIM, self.font_tiny),
         ]
 

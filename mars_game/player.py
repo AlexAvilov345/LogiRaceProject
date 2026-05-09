@@ -5,6 +5,7 @@ class Player:
         self.x = x
         self.y = y
         self.speed = 7.5
+        self.base_speed = 7.5
         self.acceleration = 0.04
         self.vel_x = 0
         self.vel_y = 0
@@ -33,17 +34,17 @@ class Player:
         target_x = 0
         target_y = 0
 
-        if keys[pygame.K_a]: # Влево
+        if keys[pygame.K_a]: 
             target_x = -self.speed
             self.current_image = self.img_left
-        elif keys[pygame.K_d]: # Вправо
+        elif keys[pygame.K_d]: 
             target_x = self.speed
             self.current_image = self.img_right
         
-        if keys[pygame.K_w]: # Вверх
+        if keys[pygame.K_w]: 
             target_y = -self.speed
             self.current_image = self.img_up
-        elif keys[pygame.K_s]: # Вниз
+        elif keys[pygame.K_s]: 
             target_y = self.speed
             self.current_image = self.img_down
 
